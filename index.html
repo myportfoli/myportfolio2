@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acei Portfolio - 38 Stocks Fixed</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0c1117; color: #ffffff; margin: 0; padding: 20px; }
+        h1 { text-align: center; color: #4db8ff; }
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            max-width: 100%;
+        }
+        .chart-card {
+            background: #161b22;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid #30363d;
+            height: 300px; /* चार्ट की ऊंचाई थोड़ी बढ़ा दी गई है */
+        }
+        .stock-label { font-size: 14px; font-weight: bold; color: #58a6ff; margin-bottom: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<h1>My Portfolio Live Charts (Fixed)</h1>
+<p style="text-align: center; color: #8b949e;">Total Stocks: 38</p>
+
+<div id="stock-grid" class="grid-container">
+    </div>
+
+<script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script type="text/javascript">
+    const fullPortfolio = [
+        "APOLLOTYRE", "APTUS", "ARTEMISMED", "ASHOKLEY", "BAJFINANCE", 
+        "BAJAJHFL", "BSOFT", "CDSL", "EMIL", "EXIDEIND", 
+        "FEDFINA", "HCLTECH", "HDBFS", "HAL", "ICICIBANK", 
+        "IDEAFORGE", "INFIBEAM", "ITCHOTELS", "LGEINDIA", "MHRIL", 
+        "MSUMI", "NH", "SHAKTIPUMP", "SHALBY", "SHRIRAMFIN", 
+        "TATACAP", "TATAELXSI", "TATAGOLD", "TMCV", "TMPV", 
+        "TATAPOWER", "TATATECH", "TEJASNET", "TITAN", "TRENT", 
+        "URBANCO", "VBL", "VMM"
+    ];
+
+    const grid = document.getElementById('stock-grid');
+
+    fullPortfolio.forEach((stock, index) => {
+        // Create Card
+        const card = document.createElement('div');
+        card.className = 'chart-card';
+        card.innerHTML = `<div class="stock-label">${stock}</div><div id="chart_${index}" style="height: 250px;"></div>`;
+        grid.appendChild(card);
+
+        // Initialize TradingView Widget
+        new TradingView.widget({
+            "container_id": `chart_${index}`,
+            "autosize": true,
+            "symbol": "NSE:" + stock,
+            "interval": "D",
+            "timezone": "Asia/Kolkata",
+            "theme": "dark",
+            "style": "1",
+            "locale": "in",
+            "toolbar_bg": "#f1f3f6",
+            "enable_publishing": false,
+            "hide_top_toolbar": true,
+            "hide_legend": true,
+            "save_image": false,
+            "container_id": `chart_${index}`
+        });
+    });
+</script>
+
+</body>
+</html>

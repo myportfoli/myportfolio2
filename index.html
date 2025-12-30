@@ -3,35 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acei Portfolio - 38 Stocks Fixed</title>
+    <title>Acei Portfolio - 38 Stocks Live</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0c1117; color: #ffffff; margin: 0; padding: 20px; }
-        h1 { text-align: center; color: #4db8ff; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0d1117; color: #ffffff; margin: 0; padding: 20px; }
+        h1 { text-align: center; color: #58a6ff; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #8b949e; margin-bottom: 30px; }
+        
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 20px;
-            max-width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
         }
+        
         .chart-card {
             background: #161b22;
-            padding: 10px;
+            padding: 15px;
             border-radius: 12px;
             border: 1px solid #30363d;
-            height: 300px; /* चार्ट की ऊंचाई थोड़ी बढ़ा दी गई है */
+            transition: transform 0.2s ease;
         }
-        .stock-label { font-size: 14px; font-weight: bold; color: #58a6ff; margin-bottom: 10px; text-align: center; }
+
+        .chart-card:hover {
+            border-color: #58a6ff;
+            transform: translateY(-5px);
+        }
+
+        .stock-label { 
+            font-size: 16px; 
+            font-weight: bold; 
+            color: #ffffff; 
+            margin-bottom: 12px; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .live-dot {
+            height: 8px;
+            width: 8px;
+            background-color: #23d333;
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 8px #23d333;
+        }
     </style>
 </head>
 <body>
 
-<h1>My Portfolio Live Charts (Fixed)</h1>
-<p style="text-align: center; color: #8b949e;">Total Stocks: 38</p>
+<h1>My Portfolio Live Charts</h1>
+<p class="subtitle">Total Stocks: 38 | Exchange: NSE</p>
 
-<div id="stock-grid" class="grid-container">
-    </div>
+<div id="stock-grid" class="grid-container"></div>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
 <script type="text/javascript">
     const fullPortfolio = [
         "APOLLOTYRE", "APTUS", "ARTEMISMED", "ASHOKLEY", "BAJFINANCE", 
@@ -47,15 +74,20 @@
     const grid = document.getElementById('stock-grid');
 
     fullPortfolio.forEach((stock, index) => {
-        // Create Card
+        // Card structure
         const card = document.createElement('div');
         card.className = 'chart-card';
-        card.innerHTML = `<div class="stock-label">${stock}</div><div id="chart_${index}" style="height: 250px;"></div>`;
+        card.innerHTML = `
+            <div class="stock-label">
+                ${stock} 
+                <span class="live-dot" title="Live"></span>
+            </div>
+            <div id="chart_${index}" style="height: 250px;"></div>
+        `;
         grid.appendChild(card);
 
-        // Initialize TradingView Widget
+        // TradingView Widget Configuration
         new TradingView.widget({
-            "container_id": `chart_${index}`,
             "autosize": true,
             "symbol": "NSE:" + stock,
             "interval": "D",
@@ -66,9 +98,15 @@
             "toolbar_bg": "#f1f3f6",
             "enable_publishing": false,
             "hide_top_toolbar": true,
-            "hide_legend": true,
+            "hide_legend": false, // लेजेंड को ऑन रखा है ताकि भाव दिखे
             "save_image": false,
-            "container_id": `chart_${index}`
+            "container_id": `chart_${index}`,
+            "studies": [
+                "RSI@tv-basicstudies" // आप चाहें तो इंडिकेटर हटा सकते हैं
+            ],
+            "show_popup_button": true,
+            "popup_width": "1000",
+            "popup_height": "650"
         });
     });
 </script>

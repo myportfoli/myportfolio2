@@ -2,113 +2,152 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acei Portfolio - 38 Stocks Live</title>
+    <title>Acei Portfolio - Live Buy/Sell</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0d1117; color: #ffffff; margin: 0; padding: 20px; }
-        h1 { text-align: center; color: #58a6ff; margin-bottom: 5px; }
-        .subtitle { text-align: center; color: #8b949e; margin-bottom: 30px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0c1117; color: #fff; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        .top-bar { background: #161b22; padding: 10px 20px; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
         
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+        #sidebar { width: 360px; border-right: 1px solid #30363d; display: flex; flex-direction: column; background: #0d1117; }
+        .action-box { padding: 15px; border-bottom: 1px solid #30363d; background: #161b22; display: flex; flex-direction: column; gap: 8px; }
+        .input-row { display: flex; gap: 5px; }
+        .input-row input { background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 8px; border-radius: 4px; font-size: 12px; width: 100%; }
         
-        .chart-card {
-            background: #161b22;
-            padding: 15px;
-            border-radius: 12px;
-            border: 1px solid #30363d;
-            transition: transform 0.2s ease;
-        }
-
-        .chart-card:hover {
-            border-color: #58a6ff;
-            transform: translateY(-5px);
-        }
-
-        .stock-label { 
-            font-size: 16px; 
-            font-weight: bold; 
-            color: #ffffff; 
-            margin-bottom: 12px; 
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .live-dot {
-            height: 8px;
-            width: 8px;
-            background-color: #23d333;
-            border-radius: 50%;
-            display: inline-block;
-            box-shadow: 0 0 8px #23d333;
-        }
+        .btn-group { display: flex; gap: 5px; }
+        .buy-btn { background: #238636; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-weight: bold; flex: 1; }
+        .sell-btn { background: #da3633; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 4px; font-weight: bold; flex: 1; }
+        
+        #stock-list-ui { flex: 1; overflow-y: auto; }
+        .stock-item { padding: 12px 15px; border-bottom: 1px solid #21262d; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .stock-item:hover { background: #1f2937; }
+        .active { background: #1f2937 !important; border-left: 4px solid #3fb950; }
+        
+        .stock-info b { color: #58a6ff; font-size: 14px; }
+        .stock-stats { font-size: 11px; color: #8b949e; margin-top: 4px; }
+        
+        #chart-container { flex: 1; background: #000; }
+        .header-tag { padding: 10px; background: #161b22; font-size: 11px; color: #58a6ff; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-<h1>My Portfolio Live Charts</h1>
-<p class="subtitle">Total Stocks: 38 | Exchange: NSE</p>
+<div class="top-bar">
+    <div>
+        <span style="color: #8b949e; font-size: 11px;">ACEI SMART TRADER</span><br>
+        <span style="font-size: 18px; color: #3fb950; font-weight: bold;">LIVE BUY/SELL TRACKER</span>
+    </div>
+</div>
 
-<div id="stock-grid" class="grid-container"></div>
+<div class="main-layout">
+    <div id="sidebar">
+        <div class="action-box">
+            <div class="input-row">
+                <input type="text" id="sym" placeholder="Stock Name">
+                <input type="number" id="qty" placeholder="Qty">
+                <input type="number" id="prc" placeholder="Price">
+            </div>
+            <div class="btn-group">
+                <button class="buy-btn" onclick="processTrade('BUY')">BUY / AVG</button>
+                <button class="sell-btn" onclick="processTrade('SELL')">SELL</button>
+            </div>
+        </div>
+
+        <div class="header-tag">Current Holdings (<span id="count">0</span>)</div>
+        <div id="stock-list-ui"></div>
+    </div>
+
+    <div id="chart-container">
+        <div id="tradingview_box" style="height: 100%;"></div>
+    </div>
+</div>
 
 <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+<script>
+    const masterList = ["APOLLOTYRE", "APTUS", "ARTEMISMED", "ASHOKLEY", "BAJFINANCE", "BAJAJHFL", "BSOFT", "CDSL", "EMIL", "EXIDEIND", "FEDFINA", "HCLTECH", "HDBFS", "HAL", "ICICIBANK", "IDEAFORGE", "INFIBEAM", "ITCHOTELS", "LGEINDIA", "MHRIL", "MSUMI", "NH", "SHAKTIPUMP", "SHALBY", "SHRIRAMFIN", "TATACAP", "TATAELXSI", "TATAGOLD", "TMCV", "TMPV", "TATAPOWER", "TATATECH", "TEJASNET", "TITAN", "TRENT", "URBANCO", "VBL", "VMM"];
 
-<script type="text/javascript">
-    const fullPortfolio = [
-        "APOLLOTYRE", "APTUS", "ARTEMISMED", "ASHOKLEY", "BAJFINANCE", 
-        "BAJAJHFL", "BSOFT", "CDSL", "EMIL", "EXIDEIND", 
-        "FEDFINA", "HCLTECH", "HDBFS", "HAL", "ICICIBANK", 
-        "IDEAFORGE", "INFIBEAM", "ITCHOTELS", "LGEINDIA", "MHRIL", 
-        "MSUMI", "NH", "SHAKTIPUMP", "SHALBY", "SHRIRAMFIN", 
-        "TATACAP", "TATAELXSI", "TATAGOLD", "TMCV", "TMPV", 
-        "TATAPOWER", "TATATECH", "TEJASNET", "TITAN", "TRENT", 
-        "URBANCO", "VBL", "VMM"
-    ];
+    let myPortfolio = JSON.parse(localStorage.getItem('acei_pro_portfolio'));
+    if (!myPortfolio) {
+        myPortfolio = masterList.map(s => ({ s: s, q: 0, a: 0 }));
+    }
 
-    const grid = document.getElementById('stock-grid');
+    function renderList() {
+        const container = document.getElementById('stock-list-ui');
+        container.innerHTML = '';
+        // केवल वो स्टॉक दिखाएँ जिनकी Qty 0 से ज्यादा है
+        const activeHoldings = myPortfolio.filter(item => item.q > 0);
+        document.getElementById('count').innerText = activeHoldings.length;
 
-    fullPortfolio.forEach((stock, index) => {
-        // Card structure
-        const card = document.createElement('div');
-        card.className = 'chart-card';
-        card.innerHTML = `
-            <div class="stock-label">
-                ${stock} 
-                <span class="live-dot" title="Live"></span>
-            </div>
-            <div id="chart_${index}" style="height: 250px;"></div>
-        `;
-        grid.appendChild(card);
-
-        // TradingView Widget Configuration
-        new TradingView.widget({
-            "autosize": true,
-            "symbol": "NSE:" + stock,
-            "interval": "D",
-            "timezone": "Asia/Kolkata",
-            "theme": "dark",
-            "style": "1",
-            "locale": "in",
-            "toolbar_bg": "#f1f3f6",
-            "enable_publishing": false,
-            "hide_top_toolbar": true,
-            "hide_legend": false, // लेजेंड को ऑन रखा है ताकि भाव दिखे
-            "save_image": false,
-            "container_id": `chart_${index}`,
-            "studies": [
-                "RSI@tv-basicstudies" // आप चाहें तो इंडिकेटर हटा सकते हैं
-            ],
-            "show_popup_button": true,
-            "popup_width": "1000",
-            "popup_height": "650"
+        myPortfolio.forEach((item, index) => {
+            if(item.q > 0) {
+                const div = document.createElement('div');
+                div.className = 'stock-item';
+                div.innerHTML = `
+                    <div class="stock-info" onclick="loadChart('${item.s}', this)" style="flex:1">
+                        <b>${item.s}</b>
+                        <div class="stock-stats">Qty: ${item.q} | Avg: ₹${item.a.toFixed(2)}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            }
         });
-    });
+        localStorage.setItem('acei_pro_portfolio', JSON.stringify(myPortfolio));
+    }
+
+    function processTrade(type) {
+        const sym = document.getElementById('sym').value.toUpperCase().trim();
+        const tQty = parseFloat(document.getElementById('qty').value);
+        const tPrc = parseFloat(document.getElementById('prc').value);
+
+        if (!sym || isNaN(tQty)) return alert("Qty भरें!");
+
+        const idx = myPortfolio.findIndex(item => item.s === sym);
+        
+        if (type === 'BUY') {
+            if (idx !== -1) {
+                let old = myPortfolio[idx];
+                let totalCost = (old.q * old.a) + (tQty * (tPrc || 0));
+                myPortfolio[idx].q += tQty;
+                myPortfolio[idx].a = totalCost / myPortfolio[idx].q;
+            } else {
+                myPortfolio.unshift({ s: sym, q: tQty, a: tPrc || 0 });
+            }
+        } 
+        else if (type === 'SELL') {
+            if (idx !== -1) {
+                if (tQty > myPortfolio[idx].q) return alert("उतने शेयर नहीं हैं!");
+                myPortfolio[idx].q -= tQty;
+                if (myPortfolio[idx].q === 0) {
+                    alert(`${sym} पोर्टफोलियो से हट गया है।`);
+                }
+            } else {
+                alert("यह स्टॉक आपके पास नहीं है!");
+            }
+        }
+
+        renderList();
+        loadChart(sym);
+        document.getElementById('qty').value = '';
+        document.getElementById('prc').value = '';
+    }
+
+    function loadChart(symbol, element) {
+        if(element) {
+            document.querySelectorAll('.stock-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+        }
+        new TradingView.widget({
+            "autosize": true, "symbol": "NSE:" + symbol, "interval": "D",
+            "timezone": "Asia/Kolkata", "theme": "dark", "style": "1",
+            "locale": "in", "container_id": "tradingview_box"
+        });
+    }
+
+    renderList();
+    if(myPortfolio.some(i => i.q > 0)) {
+        loadChart(myPortfolio.find(i => i.q > 0).s);
+    } else {
+        loadChart("NIFTY");
+    }
 </script>
 
 </body>
